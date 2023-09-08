@@ -1,12 +1,13 @@
 cc.Class({
     extends: cc.Component,
     properties: {
-        
+
     },
 
     onLoad() {
         window.app = this;
         this.initManager();
+        this.preloadAudio();
     },
 
     initManager() {
@@ -14,11 +15,9 @@ cc.Class({
         this.game = this.prefabMgr.gameNode.getComponent('Game');
     },
 
-    onRestartButtonClick() {
-        this.game.restart();
-    },
-
-    onPauseButtonClick() {
-        this.game.pause();
+    // 音频预加载
+    preloadAudio() {
+        const urls = ['audios/pause', 'audios/fit', 'audios/eat_apple', 'audios/game_over']
+        cc.loader.loadResArray(urls, cc.AudioClip);
     },
 })

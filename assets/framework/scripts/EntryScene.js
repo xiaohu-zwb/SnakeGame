@@ -3,7 +3,11 @@ cc.Class({
     extends: cc.Component,
 
     properties: {
-        
+
+    },
+
+    onLoad() {
+        this.preloadMusics();
     },
 
     onStartGameButtonClick() {
@@ -17,5 +21,11 @@ cc.Class({
                 cc.log("load " + dirScene + " successfully");
             }
         })
+    },
+
+    // 背景音乐预加载
+    preloadMusics() {
+        const urls = ['musics/background']
+        cc.loader.loadResArray(urls, cc.AudioClip);
     },
 });

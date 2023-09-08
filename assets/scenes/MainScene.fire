@@ -2048,6 +2048,9 @@
     "buttonPause": {
       "__id__": 101
     },
+    "buttonRestart": {
+      "__id__": 107
+    },
     "tipPanel": {
       "__id__": 124
     },
@@ -2479,7 +2482,7 @@
     },
     "_contentSize": {
       "__type__": "cc.Size",
-      "width": 121.05,
+      "width": 93.05,
       "height": 30
     },
     "_anchorPoint": {
@@ -2541,7 +2544,7 @@
     },
     "_contentSize": {
       "__type__": "cc.Size",
-      "width": 91.03,
+      "width": 63.03,
       "height": 27.72
     },
     "_anchorPoint": {
@@ -2592,8 +2595,8 @@
       }
     ],
     "_useOriginalSize": false,
-    "_string": "Max Score:",
-    "_N$string": "Max Score:",
+    "_string": "Record:",
+    "_N$string": "Record:",
     "_fontSize": 18,
     "_lineHeight": 22,
     "_enableWrapText": true,
@@ -2647,7 +2650,7 @@
       "__type__": "TypedArray",
       "ctor": "Float64Array",
       "array": [
-        101.03,
+        73.03,
         0,
         0,
         0,
@@ -2741,7 +2744,7 @@
     "_enabled": true,
     "_layoutSize": {
       "__type__": "cc.Size",
-      "width": 121.05,
+      "width": 93.05,
       "height": 30
     },
     "_resize": 1,
@@ -4517,9 +4520,9 @@
     "_opacity": 255,
     "_color": {
       "__type__": "cc.Color",
-      "r": 114,
-      "g": 82,
-      "b": 82,
+      "r": 192,
+      "g": 171,
+      "b": 171,
       "a": 255
     },
     "_contentSize": {
@@ -5077,11 +5080,11 @@
   {
     "__type__": "cc.ClickEvent",
     "target": {
-      "__id__": 2
+      "__id__": 6
     },
     "component": "",
-    "_componentId": "17781GQmLhJ0qV8jFkDwG1Z",
-    "handler": "onPauseButtonClick",
+    "_componentId": "1b6a3nd11ZHnonx2pLiJDBi",
+    "handler": "togglePause",
     "customEventData": ""
   },
   {
@@ -5178,7 +5181,7 @@
     },
     "_contentSize": {
       "__type__": "cc.Size",
-      "width": 118.54,
+      "width": 88,
       "height": 32.76
     },
     "_anchorPoint": {
@@ -5229,8 +5232,8 @@
       }
     ],
     "_useOriginalSize": false,
-    "_string": "重新游戏(R)",
-    "_N$string": "重新游戏(R)",
+    "_string": "重新游戏",
+    "_N$string": "重新游戏",
     "_fontSize": 22,
     "_lineHeight": 26,
     "_enableWrapText": true,
@@ -5354,11 +5357,11 @@
   {
     "__type__": "cc.ClickEvent",
     "target": {
-      "__id__": 2
+      "__id__": 6
     },
     "component": "",
-    "_componentId": "17781GQmLhJ0qV8jFkDwG1Z",
-    "handler": "onRestartButtonClick",
+    "_componentId": "1b6a3nd11ZHnonx2pLiJDBi",
+    "handler": "restart",
     "customEventData": ""
   },
   {

@@ -20,6 +20,7 @@ cc.Class({
         operateNode: cc.Node,
         pauseLabel: cc.Label,
         buttonPause: cc.Node,
+        buttonRestart: cc.Node,
         tipPanel: cc.Node
     },
 
@@ -34,6 +35,7 @@ cc.Class({
     },
 
     restart() {
+        this.playBackgroundMusic();
         this.activeNodes();
         this._operate.init();
         this.deskClear();
@@ -46,19 +48,48 @@ cc.Class({
         this.gameOverNode.active = false;
         this.gamePauseNode.active = false;
         this.buttonPause.active = true;
+        this.buttonRestart.active = false;
         this.tipPanel.active = false;
     },
 
-    pause(showGamePauseNode = true) {
+    pause() {
+        cc.audioEngine.pauseMusic();
+        this.playAudio('audios/pause');
+        this.commonPause();
+    },
+
+    commonPause() {
+        cc.director.pause();
+        this.pauseLabel.string = '恢复(Space)';
+        this.gamePauseNode.active = false; 
+    },
+
+    resume() {
+        cc.audioEngine.resumeMusic();
+        this.levelResume();
+    },
+
+    levelPause() {
+        this.commonPause();
+        // 使用系统级的定时器，避免被暂停失效
+        setTimeout(() => {
+            this.levelResume();
+            this.playBackgroundMusic();
+        }, 2 * 1000)
+    },
+
+    levelResume() {
+        cc.director.resume();
+        this.pauseLabel.string = '暂停(Space)';
+        this.gamePauseNode.active = false;
+        this.tipPanel.active = false;
+    },
+
+    togglePause() {
         if (cc.director.isPaused()) {
-            this.pauseLabel.string = '暂停(Space)';
-            cc.director.resume();
-            this.gamePauseNode.active = false;
-            this.tipPanel.active = false;
+            this.resume();
         } else {
-            this.pauseLabel.string = '恢复(Space)';
-            cc.director.pause();
-            this.gamePauseNode.active = showGamePauseNode;
+            this.pause();
         }
     },
 
@@ -890,6 +921,8 @@ cc.Class({
     onSnakeRunEvent(headNextPosX, headNextPosY) {
         // 是否游戏结束
         if (this.isGameOver(headNextPosX, headNextPosY)) {
+            // 撞击音效
+            this.playAudio('audios/fit');
             this.runGameOver();
             return;
         }
@@ -897,6 +930,7 @@ cc.Class({
         if (this._apples && this._apples.length > 0) {
             let { flag, _apple } = this.isEatApple(headNextPosX, headNextPosY);
             if (flag) {
+                this.playEatAppleAudio();
                 this.gainScore(_apple.getAppleScore());
                 this.gainLifeTime(_apple.getAppleAddLifeTime());
                 this.initApple(_apple);
@@ -915,6 +949,48 @@ cc.Class({
                 this.onSnakeRunEvent(posX, posY);
             }
         }
+    },
+
+    playEatAppleAudio() {
+        this.playAudio('audios/eat_apple');
+    },
+
+    playGameOverAudio() {
+        this.playAudio('audios/game_over');
+    },
+
+    playRecordAudio() {
+        this.playAudio('audios/record');
+    },
+
+    playWinAudio() {
+        this.playAudio('audios/win');   
+    },
+
+    playAudio(url) {
+        cc.loader.loadRes(url, cc.AudioClip, function (err, clip) {
+            if (err) {
+                cc.error(err.message || err);
+                return;
+            }
+            cc.audioEngine.play(clip, false, 1);
+        });
+    },
+
+    playBackgroundMusic() {
+        const url = 'musics/background'
+        cc.loader.loadRes(url, cc.AudioClip, function (err, clip) {
+            if (err) {
+                cc.error(err.message || err);
+                return;
+            }
+            this.backgroundAudioID = cc.audioEngine.playMusic(clip, true);
+            cc.audioEngine.setVolume(this.backgroundAudioID, 0.5);
+        });
+    },
+
+    stopBackgroundMusic() {
+        cc.audioEngine.stopMusic();
     },
 
     /**
@@ -1120,11 +1196,13 @@ cc.Class({
         this.totalScore.string = this.formatNum(this.score);
         // 判断过关
         if (this.score > Enum.Level_Score["Level_" + this.level]) {
+            this.stopBackgroundMusic();
+            this.playWinAudio();
             this.level += 1;
             this.setCurrentLevel(this.level);
             this.totalLifeTime += 30;
             this.remainLifeTime = this.totalLifeTime;
-            this.pause(false);
+            this.levelPause();
         }
     },
 
@@ -1161,23 +1239,36 @@ cc.Class({
         return { flag: false }
     },
 
+    resetAllApples() {
+        for (let i = 0; i < this._apples.length; i++) {
+            let _apple = this._apples[i];
+            _apple.reset();
+        }
+    },
+
     runGameOver() {
         // 隐藏暂停
         this.buttonPause.active = false;
+        this.buttonRestart.active = true;
         // 取消所有定时器
         this.unscheduleAllCallbacks();
         // 取消事件监听
         this.offEvent();
         // 取消所有的苹果定时器
-        for (let i = 0; i < this._apples.length; i++) {
-            let _apple = this._apples[i];
-            _apple.reset();
-        }
+        this.resetAllApples();
         // 闪动
         this.addBlinkAnim();
         // show "GameOver" or "New Record"
         const isNewRecord = this.isNewRecord();
         this.addGameOverAnim(isNewRecord ? 'New Record' : 'Game Over');
+        // 关闭背景音乐
+        this.stopBackgroundMusic();
+        // 游戏结束和破纪录的音效不一样
+        if (isNewRecord) {
+            this.playRecordAudio();
+        } else {
+            this.playGameOverAudio();
+        }
         // 上传分数
         if (isNewRecord) {
             this.setMaxScore();
@@ -1408,13 +1499,9 @@ cc.Class({
                 this._operate.setSpeedUpOpacity();
                 this.speedstate = true;
                 break;
-            case cc.macro.KEY.r:
-                // 重新游戏
-                this.restart();
-                break;
             case cc.macro.KEY.space:
                 // 暂停游戏
-                this.pause();
+                this.togglePause();
                 break;
         }
     },
